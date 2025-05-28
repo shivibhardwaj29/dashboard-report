@@ -1,0 +1,28 @@
+<div class="sidebar" [class.collapsed]="isCollapsed">
+  <div class="sidebar-header" (click)="toggleSidebar()">
+    <mat-icon>{{ isCollapsed ? "menu" : "close" }}</mat-icon>
+    <span class="sidebar-title" *ngIf="!isCollapsed">Administrator</span>
+  </div>
+
+  <ul class="sidebar-menu">
+    <li
+      *ngFor="let item of menuItems"
+      [class.active]="item === 'Dashboard'"
+      (click)="navigateTo(item)"
+      (mouseenter)="showTooltip(item, $event)"
+      (mouseleave)="hideTooltip()"
+    >
+      <mat-icon>dashboard</mat-icon>
+      <span class="menu-label" *ngIf="!isCollapsed">{{ item }}</span>
+
+      <div
+        class="tooltip"
+        *ngIf="isCollapsed && tooltip === item"
+        [style.top.px]="tooltipY"
+        [style.left.px]="tooltipX"
+      >
+        {{ item }}
+      </div>
+    </li>
+  </ul>
+</div>

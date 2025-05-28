@@ -1,0 +1,75 @@
+<div class="container p-3">
+  <div class="page-title mb-3">
+    <h1>Dashboard</h1>
+  </div>
+
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title class="text-sm">Filter</mat-card-title>
+    </mat-card-header>
+    <hr class="mb-3" />
+
+    <div *ngIf="isLoading | async" class="spinner-overlay">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+    <mat-card-content *ngIf="!(isLoading | async)">
+      <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="dense-field full-width">
+              <mat-label>Staff Member</mat-label>
+              <mat-select formControlName="staffMember">
+                <mat-option *ngFor="let staff of staffMembers" [value]="staff">
+                  {{ staff }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="dense-field full-width">
+              <mat-label>Production Staff Group</mat-label>
+              <mat-select formControlName="productionStaffGroup" multiple>
+                <mat-option
+                  *ngFor="let group of productionGroups"
+                  [value]="group"
+                >
+                  {{ group }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="col-md-4">
+            <mat-form-field appearance="outline" class="dense-field full-width">
+              <mat-label>Journal</mat-label>
+              <mat-select formControlName="journal" multiple>
+                <mat-option *ngFor="let journal of journals" [value]="journal">
+                  {{ journal }}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+        </div>
+      </form>
+    </mat-card-content>
+    <mat-card-actions class="card-footer d-flex justify-content-end">
+      <button class="btn btn-sm btn-primary me-2" (click)="onSubmit()">
+        Apply
+      </button>
+      <button class="btn btn-sm btn-outline-danger" (click)="onReset()">
+        Reset
+      </button>
+    </mat-card-actions>
+  </mat-card>
+
+  <mat-card class="mt-4" *ngIf="showWIPReport">
+    <mat-card-header>
+      <mat-card-title>WIP Report</mat-card-title>
+    </mat-card-header>
+    <hr class="mb-3" />
+    <mat-card-content>
+      <app-wip-report [data]="wipReportData"></app-wip-report>
+    </mat-card-content>
+  </mat-card>
+</div>
