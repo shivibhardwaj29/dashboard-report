@@ -1,8 +1,14 @@
-<div *ngIf="data && data.length === 0" class="warning-message">
+<div *ngIf="reportData && reportData.length === 0" class="warning-message">
   <mat-icon color="warn">warning</mat-icon>
   <span class="ms-3"> WIP data not found with the selected criteria.</span>
 </div>
 
-<div *ngIf="data && data.length > 0">
-  <p>wip-report works!</p>
+<div *ngIf="reportData && reportData.length > 0">
+  <apx-chart 
+    [series]="chartSeries"
+    [chart]="chartDetails"
+    [xaxis]="chartXAxis"
+    [yaxis]="chartYAxis"
+    [title]="chartTitle">
+  </apx-chart>
 </div>

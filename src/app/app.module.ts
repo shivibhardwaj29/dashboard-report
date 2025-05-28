@@ -1,22 +1,28 @@
 import { NgModule } from '@angular/core';
-import { BrowserModule, provideClientHydration } from '@angular/platform-browser';
+import {
+  BrowserModule,
+  provideClientHydration,
+} from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { SharedModule } from './shared/shared.module';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { MatIconModule } from '@angular/material/icon';
-import { HTTP_INTERCEPTORS, HttpClientModule, provideHttpClient, withFetch } from '@angular/common/http';
+import {
+  HTTP_INTERCEPTORS,
+  HttpClientModule,
+  provideHttpClient,
+  withFetch,
+} from '@angular/common/http';
 import { LayoutComponent } from './layout/layout.component';
 import { PagesModule } from './pages/pages.module';
 import { MatCardModule, MatCardTitle } from '@angular/material/card';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    LayoutComponent
-  ],
+  declarations: [AppComponent, LayoutComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,
@@ -25,17 +31,18 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     HttpClientModule,
     PagesModule,
     MatCardModule,
+    NgApexchartsModule,
   ],
   providers: [
     provideClientHydration(),
     provideAnimationsAsync(),
     provideHttpClient(withFetch()),
-     {
+    {
       provide: HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi: true
-    }
+      multi: true,
+    },
   ],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

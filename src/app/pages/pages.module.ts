@@ -8,6 +8,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { WipReportComponent } from './wip-report/wip-report.component';
 import { MatIconModule } from '@angular/material/icon';
+import { NgApexchartsModule } from 'ng-apexcharts';
 
 @NgModule({
   declarations: [ReportComponent, WipReportComponent],
@@ -18,7 +19,8 @@ import { MatIconModule } from '@angular/material/icon';
     MatCheckboxModule,
     ReactiveFormsModule,
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    NgApexchartsModule,
   ],
   exports: [ReportComponent],
 })
