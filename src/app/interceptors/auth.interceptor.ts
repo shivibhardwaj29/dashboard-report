@@ -18,8 +18,8 @@ export class AuthInterceptor implements HttpInterceptor {
     return next.handle(req).pipe(
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          console.log("denied");
-          
+          window.location.href =
+            'https://trackit.test.mpstechnologies.com/mpstrak/login/index';
         }
         return throwError(() => error);
       })

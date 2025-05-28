@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiBaseUrl: '',
+  apiBaseUrl: 'https://trackitrepo.mpstechnologies.com/mpstrak-service-rpt-WIP/',
 };
