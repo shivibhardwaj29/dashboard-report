@@ -19,8 +19,11 @@
             <mat-form-field appearance="outline" class="dense-field full-width">
               <mat-label>Staff Member</mat-label>
               <mat-select formControlName="staffMember">
-                <mat-option *ngFor="let staff of staffMembers" [value]="staff">
-                  {{ staff }}
+                <mat-option
+                  *ngFor="let staff of staffMembers"
+                  [value]="staff.value"
+                >
+                  {{ staff.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -32,9 +35,9 @@
               <mat-select formControlName="productionStaffGroup" multiple>
                 <mat-option
                   *ngFor="let group of productionGroups"
-                  [value]="group"
+                  [value]="group.value"
                 >
-                  {{ group }}
+                  {{ group?.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>
@@ -44,8 +47,11 @@
             <mat-form-field appearance="outline" class="dense-field full-width">
               <mat-label>Journal</mat-label>
               <mat-select formControlName="journal" multiple>
-                <mat-option *ngFor="let journal of journals" [value]="journal">
-                  {{ journal }}
+                <mat-option
+                  *ngFor="let journal of journals"
+                  [value]="journal?.value"
+                >
+                  {{ journal?.label }}
                 </mat-option>
               </mat-select>
             </mat-form-field>

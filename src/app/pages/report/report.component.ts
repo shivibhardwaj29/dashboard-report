@@ -10,9 +10,9 @@ import { ENDPOINTS } from '../../core/api/endpoints';
 })
 export class ReportComponent {
   filterForm!: FormGroup;
-  staffMembers = ['John Doe', 'Jane Smith', 'Alice Johnson'];
-  productionGroups = ['Group A', 'Group B', 'Group C'];
-  journals = ['Journal 1', 'Journal 2', 'Journal 3'];
+  staffMembers: { label: string; value: any }[] = [];
+  productionGroups: { label: string; value: any }[] = [];
+  journals: { label: string; value: any }[] = [];
   showWIPReport = false;
   wipReportData = [];
   apiData: any = [];
@@ -22,79 +22,93 @@ export class ReportComponent {
   ngOnInit() {
     this.filterForm = this.fb.group({
       staffMember: ['', Validators.required],
-      productionStaffGroup: [[], Validators.required],
-      journal: [[], Validators.required],
+      productionStaffGroup: [[]],
+      journal: [[]],
     });
     this.loadOptions();
   }
 
   loadOptions(): void {
-    this.httpService.getData(ENDPOINTS.journals).subscribe((res: any) => {
-      if (!Array.isArray(res)) return;
-      this.apiData = res;
-      const journalOptions = res
-        .map((item) => ({
-          label: item?.journal_acronym || 'Unknown Journal',
-          value: item?.journal_id,
-        }))
-        .filter((opt) => opt.label && opt.value)
-        .filter(
-          (value, index, self) =>
-            index === self.findIndex((t) => t.label === value.label)
-        );
-      this.journals = journalOptions.map((o) => o.label);
+    this.httpService
+      .getData(ENDPOINTS.journals, null, true)
+      .subscribe((res: any) => {
+        if (!Array.isArray(res)) return;
+        this.apiData = res;
 
-      const staffOptions = res
-        .map((item) => ({
-          label: item?.production_editor_name || 'Unknown Editor',
-          value: item?.production_editor_id,
-        }))
-        .filter((opt) => opt.label && opt.value)
-        .filter(
-          (value, index, self) =>
-            index === self.findIndex((t) => t.label === value.label)
-        );
-      this.staffMembers = staffOptions.map((o) => o.label);
+        const seenJournalIds = new Set();
+        const journalOptions = res
+          .map((item) => ({
+            label: item?.journal_acronym || 'Unknown Journal',
+            value: item?.journal_id,
+          }))
+          .filter(
+            (opt) =>
+              opt.label &&
+              opt.value &&
+              !seenJournalIds.has(opt.value) &&
+              seenJournalIds.add(opt.value)
+          );
+        this.journals = journalOptions;
 
-      const seenGroupIds = new Set();
-      const prodStaffOptions = res
-        .map((item) => ({
-          label: item?.group_Name || 'Unknown Group',
-          value: item?.group_id,
-        }))
-        .filter(
-          (opt) =>
-            opt.label &&
-            opt.value &&
-            !seenGroupIds.has(opt.value) &&
-            seenGroupIds.add(opt.value)
-        )
-        .filter(
-          (value, index, self) =>
-            index === self.findIndex((t) => t.label === value.label)
-        );
-      this.productionGroups = prodStaffOptions.map((o) => o.label);
-    });
+        const seenEditorIds = new Set();
+        const staffOptions = res
+          .map((item) => ({
+            label: item?.production_editor_name || 'Unknown Editor',
+            value: item?.production_editor_id,
+          }))
+          .filter(
+            (opt) =>
+              opt.label &&
+              opt.value &&
+              !seenEditorIds.has(opt.value) &&
+              seenEditorIds.add(opt.value)
+          );
+        this.staffMembers = staffOptions;
+
+        const seenGroupIds = new Set();
+        const prodStaffOptions = res
+          .map((item) => ({
+            label: item?.group_Name || 'Unknown Group',
+            value: item?.group_id,
+          }))
+          .filter(
+            (opt) =>
+              opt.label &&
+              opt.value &&
+              !seenGroupIds.has(opt.value) &&
+              seenGroupIds.add(opt.value)
+          );
+        this.productionGroups = prodStaffOptions;
+      });
   }
 
   onSubmit() {
     if (this.filterForm.valid) {
       const formValue = this.filterForm.value;
-      console.log(formValue, 'formValue');
-      console.log(this.apiData, 'apiData');
+      console.log(formValue, 'ffffff');
 
-      const filteredData = this.apiData?.filter((item: any) => {
-        return (
-          item?.production_editor_name === formValue.staffMember &&
-          formValue.productionStaffGroup.includes(item?.group_Name) &&
-          formValue.journal.includes(item?.journal_acronym)
-        );
+      const staffMemberId = formValue?.staffMember;
+      const productionGroupIds =
+        formValue?.productionStaffGroup?.length > 0
+          ? formValue.productionStaffGroup?.join(',')
+          : 'ALL';
+      const journalIds =
+        formValue?.journal?.length > 0 ? formValue.journal?.join(',') : 'ALL';
+
+      const url = `${ENDPOINTS.fetchReport}${productionGroupIds}/${staffMemberId}/${journalIds}`;
+      console.log(url, 'url');
+
+      this.httpService.getData(url).subscribe({
+        next: (res: any) => {
+          console.log(res, 'res');
+          this.wipReportData = res;
+          this.showWIPReport = true;
+        },
+        error: (err) => {
+          console.error('Error fetching report:', err);
+          this.showWIPReport = false;
+        },
       });
-
-      console.log(filteredData, 'filteredData');
-
-      this.wipReportData = filteredData;
-      this.showWIPReport = true;
     }
   }
 
