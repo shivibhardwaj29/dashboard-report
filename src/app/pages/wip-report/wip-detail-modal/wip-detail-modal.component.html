@@ -1,1 +1,78 @@
-<p>wip-detail-modal works!</p>
+<div class="p-4">
+  <div class="modal-header">
+    <h2 class="modal-title">WIP Details Report</h2>
+    <button (click)="close()" aria-label="Close">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-sm btn-primary me-2" (click)="exportAsCSV()">Export as CSV</button>
+  </div>
+  <mat-dialog-content class="table-container">
+    <table mat-table [dataSource]="dataSource" *ngIf="dataSource?.length">
+      <ng-container matColumnDef="journal">
+        <th mat-header-cell *matHeaderCellDef>Journal</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element?.journal_acronym || "-" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="manuscriptId">
+        <th mat-header-cell *matHeaderCellDef>Manuscript ID</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element?.manuscriptNumber || "-" }}
+        </td>
+      </ng-container>
+      <ng-container matColumnDef="articleType">
+        <th mat-header-cell *matHeaderCellDef>Manuscript Type</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element?.article_type || "-" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="assignedTo">
+        <th mat-header-cell *matHeaderCellDef>Assigned To</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element?.assigned_to || "-" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="currentTask">
+        <th mat-header-cell *matHeaderCellDef>Current Task</th>
+        <td mat-cell *matCellDef="let element">
+          {{ element?.task_name || "-" }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="taskStartDate">
+        <th mat-header-cell *matHeaderCellDef>Task Start Date</th>
+        <td mat-cell *matCellDef="let element">
+          {{ formatDate(element?.stage_received_date) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="taskDueDate">
+        <th mat-header-cell *matHeaderCellDef>Task Due Date</th>
+        <td mat-cell *matCellDef="let element">
+          {{ formatDate(element?.due_date) }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="daysAtCurrentStage">
+        <th mat-header-cell *matHeaderCellDef>Days at Current Stage</th>
+        <td mat-cell *matCellDef="let element">
+          {{ "0" }}
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+    </table>
+
+    <div *ngIf="!dataSource?.length" class="no-data">No data available.</div>
+  </mat-dialog-content>
+
+  <!-- <mat-dialog-actions align="end">
+    <button mat-stroked-button (click)="close()">Close</button>
+  </mat-dialog-actions> -->
+</div>

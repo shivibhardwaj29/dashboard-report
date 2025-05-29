@@ -11,7 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { WipDetailModalComponent } from './wip-report/wip-detail-modal/wip-detail-modal.component';
 import { MatDialogModule } from '@angular/material/dialog';
-
+import { MatTableModule } from '@angular/material/table';
 @NgModule({
   declarations: [ReportComponent, WipReportComponent, WipDetailModalComponent],
   imports: [
@@ -23,7 +23,8 @@ import { MatDialogModule } from '@angular/material/dialog';
     MatIconModule,
     MatProgressSpinnerModule,
     NgApexchartsModule,
-    MatDialogModule
+    MatDialogModule,
+    MatTableModule,
   ],
   exports: [ReportComponent],
 })
