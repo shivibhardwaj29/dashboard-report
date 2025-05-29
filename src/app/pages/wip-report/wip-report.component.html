@@ -4,11 +4,23 @@
 </div>
 
 <div *ngIf="reportData && reportData.length > 0">
-  <apx-chart 
+  <apx-chart
     [series]="chartSeries"
     [chart]="chartDetails"
     [xaxis]="chartXAxis"
     [yaxis]="chartYAxis"
-    [title]="chartTitle">
+    [colors]="chartColors"
+    [plotOptions]="chartPlotOptions"
+    [legend]="chartLegend"
+    [tooltip]="chartTooltip"
+  >
   </apx-chart>
+  <div class="d-flex justify-content-end mt-3">
+    <button
+      class="btn btn-sm btn-outline-primary me-2"
+      (click)="openDetailedView()"
+    >
+      Detailed View
+    </button>
+  </div>
 </div>
