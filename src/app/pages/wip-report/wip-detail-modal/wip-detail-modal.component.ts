@@ -86,4 +86,15 @@ export class WipDetailModalComponent {
     link.click();
     document.body.removeChild(link);
   }
+
+  calculateDaysAtCurrentStage(startDate: string | Date): number {
+    if (!startDate) return 0;
+    const start = new Date(startDate);
+    const today = new Date();
+    start.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+
+    const diffInMs = today.getTime() - start.getTime();
+    return Math.floor(diffInMs / (1000 * 60 * 60 * 24));
+  }
 }
