@@ -16,6 +16,13 @@ export class WipDetailModalComponent {
     'taskStartDate',
     'taskDueDate',
     'daysAtCurrentStage',
+    'volume',
+    'issue',
+    'copyright',
+    'newProof',
+    'pages',
+    'onHold',
+    'comments',
   ];
   dataSource: any[] = [];
 
@@ -56,23 +63,42 @@ export class WipDetailModalComponent {
       'Task Start Date',
       'Task Due Date',
       'Days at Current Stage',
+      'Volume',
+      'Issue',
+      'Copyright',
+      'New Proof',
+      'Pages',
+      'On Hold',
+      'Comments',
     ];
 
     const csvRows = this.data?.map((item: any) => [
-      item.journal_acronym || '-',
-      item.manuscriptNumber || '-',
-      item.article_type || '-',
-      item.assigned_to || '-',
-      item.task_name || '-',
-      this.formatDate(item.stage_received_date),
-      this.formatDate(item.due_date),
+      item?.journal_acronym || '',
+      item?.manuscriptNumber || '',
+      item?.article_type || '',
+      item?.assigned_to || '',
+      item?.task_name || '',
+      this.formatDate(item?.stage_received_date),
+      this.formatDate(item?.due_date),
+      this.calculateDaysAtCurrentStage(item?.stage_received_date),
+      item?.volume_no || '',
+      item?.issue_no || '',
+      item?.copyright_statement || '',
       '0',
+      item?.pageCount || '0',
+      item?.onHold || '-',
+      item?.comments || '-',
     ]);
 
     const csvContent = [
       headers.join(','),
       ...csvRows.map((row: any) =>
-        row.map((field: any) => `"${field}"`).join(',')
+        row
+          .map((field: any, i: number) => {
+            const isDateField = i === 5 || i === 6;
+            return `"${isDateField ? '\t' + field : field}"`;
+          })
+          .join(',')
       ),
     ].join('\r\n');
 
