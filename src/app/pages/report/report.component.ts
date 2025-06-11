@@ -85,7 +85,7 @@ export class ReportComponent {
   onSubmit() {
     if (this.filterForm.valid) {
       const formValue = this.filterForm.value;
-      console.log(formValue, 'ffffff');
+      // console.log(formValue, 'ffffff');
 
       const staffMemberId = formValue?.staffMember;
       const productionGroupIds =
@@ -98,7 +98,7 @@ export class ReportComponent {
       const url = `${ENDPOINTS.fetchReport}${productionGroupIds}/${staffMemberId}/${journalIds}`;
       console.log(url, 'url');
 
-      this.httpService.getData(url).subscribe({
+      this.httpService.getData(url, null, true).subscribe({
         next: (res: any) => {
           console.log(res, 'res');
           this.wipReportData = res;

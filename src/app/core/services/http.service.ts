@@ -17,11 +17,9 @@ export class HttpService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     if (isPlatformBrowser(this.platformId)) {
-      const urlParams = new URLSearchParams(window?.location.search);
+      const urlParams = new URLSearchParams(window.location.search);
       const paramToken = urlParams.get('param');
       this.token = paramToken;
-      this.token =
-        'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTLkFkbWluIiwiaWF0IjoxNzQ3ODIyOTcwLCJleHAiOjE3NDc4MjM4NzB9.DS_7YwiOJIbi--loyM0VocFVV7dur2ZyR8vpKvLg27g';
     }
   }
 
@@ -45,6 +43,9 @@ export class HttpService {
     }
 
     this.loadingSubject.next(true);
+
+    console.log({ params: httpParams }, "{ params: httpParams }");
+    
 
     return this.http.get<T>(endpoint, { params: httpParams }).pipe(
       finalize(() => {

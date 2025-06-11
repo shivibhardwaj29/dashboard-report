@@ -37,7 +37,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   navigateTo(item: string): void {
     if (item === 'Dashboard') {
-      this.router.navigate(['/report']);
+      // this.router.navigate(['/report']);
     }
   }
 
