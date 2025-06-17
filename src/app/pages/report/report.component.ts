@@ -1,7 +1,9 @@
-import { Component, Output } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpService } from '../../core/services/http.service';
 import { ENDPOINTS } from '../../core/api/endpoints';
+import { JwtTokenService } from '../../core/services/jwt-token.service';
+import { filter, take } from 'rxjs';
 
 @Component({
   selector: 'app-report',
@@ -16,16 +18,29 @@ export class ReportComponent {
   showWIPReport = false;
   wipReportData = [];
   apiData: any = [];
-  constructor(private fb: FormBuilder, private httpService: HttpService) {}
+
+  constructor(
+    private fb: FormBuilder,
+    private httpService: HttpService,
+    private jwtService: JwtTokenService
+  ) {}
 
   isLoading: any = this.httpService.loading$;
-  ngOnInit() {
+
+  ngOnInit(): void {
     this.filterForm = this.fb.group({
       staffMember: ['', Validators.required],
       productionStaffGroup: [[]],
       journal: [[]],
     });
-    this.loadOptions();
+
+    // ✅ Load options only after JWT token is available
+    this.jwtService.jwtToken$
+      .pipe(
+        filter((token) => !!token),
+        take(1)
+      )
+      .subscribe(() => this.loadOptions());
   }
 
   loadOptions(): void {
@@ -33,10 +48,11 @@ export class ReportComponent {
       .getData(ENDPOINTS.journals, null, true)
       .subscribe((res: any) => {
         if (!Array.isArray(res)) return;
+
         this.apiData = res;
 
         const seenJournalIds = new Set();
-        const journalOptions = res
+        this.journals = res
           .map((item) => ({
             label: item?.journal_acronym || 'Unknown Journal',
             value: item?.journal_id,
@@ -48,10 +64,9 @@ export class ReportComponent {
               !seenJournalIds.has(opt.value) &&
               seenJournalIds.add(opt.value)
           );
-        this.journals = journalOptions;
 
         const seenEditorIds = new Set();
-        const staffOptions = res
+        this.staffMembers = res
           .map((item) => ({
             label: item?.production_editor_name || 'Unknown Editor',
             value: item?.production_editor_id,
@@ -63,10 +78,9 @@ export class ReportComponent {
               !seenEditorIds.has(opt.value) &&
               seenEditorIds.add(opt.value)
           );
-        this.staffMembers = staffOptions;
 
         const seenGroupIds = new Set();
-        const prodStaffOptions = res
+        this.productionGroups = res
           .map((item) => ({
             label: item?.group_Name || 'Unknown Group',
             value: item?.group_id,
@@ -78,14 +92,12 @@ export class ReportComponent {
               !seenGroupIds.has(opt.value) &&
               seenGroupIds.add(opt.value)
           );
-        this.productionGroups = prodStaffOptions;
       });
   }
 
   onSubmit() {
     if (this.filterForm.valid) {
       const formValue = this.filterForm.value;
-      // console.log(formValue, 'ffffff');
 
       const staffMemberId = formValue?.staffMember;
       const productionGroupIds =
@@ -114,6 +126,6 @@ export class ReportComponent {
 
   onReset() {
     this.filterForm.reset();
-    this, (this.showWIPReport = false);
+    this.showWIPReport = false;
   }
 }
