@@ -31,8 +31,12 @@ export class AuthInterceptor implements HttpInterceptor {
       }),
       catchError((error: HttpErrorResponse) => {
         if (error.status === 401) {
-          window.location.href =
-            'https://trackit.test.mpstechnologies.com/mpstrak/login/index';
+          console.warn('401 Unauthorized — token might be invalid');
+          localStorage.clear();
+          setTimeout(() => {
+            window.location.href =
+              'https://trackit.test.mpstechnologies.com/mpstrak/login/index';
+          }, 100);
         }
         return throwError(() => error);
       })

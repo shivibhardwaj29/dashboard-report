@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { JwtTokenService } from './core/services/jwt-token.service';
 
 @Component({
@@ -6,9 +6,15 @@ import { JwtTokenService } from './core/services/jwt-token.service';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'dashboard-report';
 
-  constructor(private jwtTokenService: JwtTokenService) {
+  constructor(private jwtTokenService: JwtTokenService) {}
+
+  ngOnInit(): void {
+    const loader = document.getElementById('global-loader');
+    if (loader) {
+      loader.remove();
+    }
   }
 }

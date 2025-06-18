@@ -1,6 +1,13 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { BehaviorSubject, Observable, switchMap, take, throwError } from 'rxjs';
+import {
+  BehaviorSubject,
+  from,
+  Observable,
+  switchMap,
+  take,
+  throwError,
+} from 'rxjs';
 import { finalize } from 'rxjs/operators';
 import { isPlatformBrowser } from '@angular/common';
 import { JwtTokenService } from './jwt-token.service';
@@ -45,32 +52,56 @@ export class HttpService {
           }
         }
 
+        // 🔁 If token is still missing, wait for it
         if (includeToken && !jwt) {
-          console.error('JWT token is required but missing.');
-          return throwError(
-            () => new Error('JWT token is required but missing.')
+          console.warn('[HttpService] Token not ready yet. Waiting...');
+          return from(this.jwtTokenService.waitForToken()).pipe(
+            switchMap((token) => {
+              if (!token) {
+                console.error('[HttpService] JWT still missing after wait.');
+                return throwError(
+                  () => new Error('JWT token is required but missing.')
+                );
+              }
+
+              return this.makeApiCall<T>(endpoint, params, token);
+            })
           );
         }
 
-        let httpParams = new HttpParams();
-
-        if (includeToken && jwt) {
-          httpParams = httpParams.set('token', jwt);
-        }
-
-        if (params) {
-          Object.entries(params).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
-              httpParams = httpParams.set(key, value as string);
-            }
-          });
-        }
-
-        this.loadingSubject.next(true);
-        return this.http
-          .get<T>(endpoint, { params: httpParams })
-          .pipe(finalize(() => this.loadingSubject.next(false)));
+        return this.makeApiCall<T>(endpoint, params, jwt);
       })
     );
+  }
+
+  private makeApiCall<T>(
+    endpoint: string,
+    params: any,
+    jwt: string | null
+  ): Observable<T> {
+    let httpParams = new HttpParams();
+
+    if (jwt) {
+      httpParams = httpParams.set('token', jwt);
+    }
+
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          if (Array.isArray(value)) {
+            value.forEach((v) => {
+              httpParams = httpParams.append(key, String(v));
+            });
+          } else {
+            httpParams = httpParams.set(key, String(value));
+          }
+        }
+      });
+    }
+
+    this.loadingSubject.next(true);
+    return this.http
+      .get<T>(endpoint, { params: httpParams })
+      .pipe(finalize(() => this.loadingSubject.next(false)));
   }
 }

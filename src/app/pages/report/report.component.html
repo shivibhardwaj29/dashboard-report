@@ -18,7 +18,7 @@
           <div class="col-md-4">
             <mat-form-field appearance="outline" class="dense-field full-width">
               <mat-label>Staff Member</mat-label>
-              <mat-select formControlName="staffMember">
+              <mat-select formControlName="staffMember" multiple>
                 <mat-option
                   *ngFor="let staff of staffMembers"
                   [value]="staff.value"
@@ -26,6 +26,15 @@
                   {{ staff.label }}
                 </mat-option>
               </mat-select>
+
+              <mat-error
+                *ngIf="
+                  filterForm.get('staffMember')?.hasError('required') &&
+                  filterForm.get('staffMember')?.touched
+                "
+              >
+                Staff Member is required
+              </mat-error>
             </mat-form-field>
           </div>
 

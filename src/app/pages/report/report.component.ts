@@ -29,18 +29,17 @@ export class ReportComponent {
 
   ngOnInit(): void {
     this.filterForm = this.fb.group({
-      staffMember: ['', Validators.required],
+      staffMember: [[], Validators.required],
       productionStaffGroup: [[]],
       journal: [[]],
     });
-
-    // ✅ Load options only after JWT token is available
-    this.jwtService.jwtToken$
-      .pipe(
-        filter((token) => !!token),
-        take(1)
-      )
-      .subscribe(() => this.loadOptions());
+    this.loadOptions();
+    // this.jwtService.jwtToken$
+    //   .pipe(
+    //     filter((token) => !!token),
+    //     take(1)
+    //   )
+    //   .subscribe(() => this.loadOptions());
   }
 
   loadOptions(): void {
@@ -77,7 +76,8 @@ export class ReportComponent {
               opt.value &&
               !seenEditorIds.has(opt.value) &&
               seenEditorIds.add(opt.value)
-          );
+          )
+          .sort((a, b) => a.label.localeCompare(b.label));
 
         const seenGroupIds = new Set();
         this.productionGroups = res
@@ -94,34 +94,37 @@ export class ReportComponent {
           );
       });
   }
-
   onSubmit() {
-    if (this.filterForm.valid) {
-      const formValue = this.filterForm.value;
-
-      const staffMemberId = formValue?.staffMember;
-      const productionGroupIds =
-        formValue?.productionStaffGroup?.length > 0
-          ? formValue.productionStaffGroup?.join(',')
-          : 'ALL';
-      const journalIds =
-        formValue?.journal?.length > 0 ? formValue.journal?.join(',') : 'ALL';
-
-      const url = `${ENDPOINTS.fetchReport}${productionGroupIds}/${staffMemberId}/${journalIds}`;
-      console.log(url, 'url');
-
-      this.httpService.getData(url, null, true).subscribe({
-        next: (res: any) => {
-          console.log(res, 'res');
-          this.wipReportData = res;
-          this.showWIPReport = true;
-        },
-        error: (err) => {
-          console.error('Error fetching report:', err);
-          this.showWIPReport = false;
-        },
-      });
+    if (this.filterForm.invalid) {
+      this.filterForm.markAllAsTouched();
+      return;
     }
+
+    const formValue = this.filterForm.value;
+    const staffMemberIds = formValue.staffMember;
+
+    const productionGroupIds =
+      formValue.productionStaffGroup?.length > 0
+        ? formValue.productionStaffGroup.join(',')
+        : 'ALL';
+
+    const journalIds =
+      formValue.journal?.length > 0 ? formValue.journal.join(',') : 'ALL';
+
+    const staffIds = staffMemberIds.join(',');
+    const url = `${ENDPOINTS.fetchReport}${productionGroupIds}/${staffIds}/${journalIds}`;
+    console.log(url, 'url');
+
+    this.httpService.getData(url, null, true).subscribe({
+      next: (res: any) => {
+        this.wipReportData = res;
+        this.showWIPReport = true;
+      },
+      error: (err) => {
+        console.error('Error fetching report:', err);
+        this.showWIPReport = false;
+      },
+    });
   }
 
   onReset() {

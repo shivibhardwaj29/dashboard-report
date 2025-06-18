@@ -1,5 +1,13 @@
 import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  firstValueFrom,
+  filter,
+  timeout,
+  catchError,
+  of,
+} from 'rxjs';
 import { isPlatformBrowser } from '@angular/common';
 
 @Injectable({
@@ -10,10 +18,12 @@ export class JwtTokenService {
   public jwtToken$: Observable<string | null> =
     this.jwtTokenSubject.asObservable();
   private tokenReceived = false;
+  private isWaitingForToken = false;
+  private readonly TOKEN_WAIT_TIMEOUT = 10000;
+  private readonly READY_SIGNAL_DELAY = 1000;
 
   constructor(@Inject(PLATFORM_ID) private platformId: Object) {
     console.log('JwtTokenService constructor initialized');
-
     if (isPlatformBrowser(this.platformId)) {
       console.log('Browser platform detected, setting up message listener');
       this.initializeMessageListener();
@@ -29,7 +39,7 @@ export class JwtTokenService {
 
   private signalReadiness(): void {
     setTimeout(() => {
-      if (window.opener) {
+      if (window.opener && typeof window.opener.postMessage === 'function') {
         window.opener.postMessage(
           {
             type: 'ANGULAR_READY',
@@ -40,13 +50,14 @@ export class JwtTokenService {
         );
         console.log('Sent ANGULAR_READY signal to parent window');
       }
-    }, 1000);
+    }, this.READY_SIGNAL_DELAY);
   }
 
   private receiveMessage(event: MessageEvent): void {
     console.log('MESSAGE RECEIVED:', event);
     console.log('Event origin:', event.origin);
     console.log('Event data:', event.data);
+
     const allowedOrigins = [
       'https://trackit-testreport.mpstechnologies.com',
       'http://localhost:4200',
@@ -69,8 +80,10 @@ export class JwtTokenService {
       if (jwt) {
         this.setJwtToken(jwt);
         this.tokenReceived = true;
+        this.isWaitingForToken = false;
         localStorage.setItem('token', jwt);
-        if (window.opener) {
+
+        if (window.opener && typeof window.opener.postMessage === 'function') {
           window.opener.postMessage(
             {
               type: 'JWT_TOKEN_RECEIVED',
@@ -84,12 +97,15 @@ export class JwtTokenService {
       } else {
         console.error('Received JWT_TOKEN message but no token in data');
       }
-    } else {
+    } else if (event.data?.type === 'CUSTOM_ON_URL_CHANGED') {
       console.log('Invalid Token Type');
+      // this.redirectToLogin();
     }
   }
 
   private checkExistingToken(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const token = localStorage.getItem('token');
     if (token && !this.tokenReceived) {
       console.log('Found token in localStorage, using it');
@@ -97,7 +113,6 @@ export class JwtTokenService {
       this.tokenReceived = true;
     } else {
       console.log('No token in localStorage yet');
-      this.redirectToLogin();
     }
   }
 
@@ -109,15 +124,28 @@ export class JwtTokenService {
   }
 
   private setJwtToken(token: string): void {
-    console.log('Setting JWT token in service & localStorage');
-    localStorage.setItem('token', token);
-    this.jwtTokenSubject.next(token);
+    const current = this.jwtTokenSubject.value;
+    if (token && token !== current) {
+      console.log('Updating JWT token in service & localStorage');
+      localStorage.setItem('token', token);
+      this.jwtTokenSubject.next(token);
+    } else {
+      console.log('Token is already current, no update needed');
+    }
   }
 
   public getToken(): string | null {
-    const token = this.jwtTokenSubject.value || localStorage.getItem('token');
-    console.log('Getting token:', token ? 'Token exists' : 'No token');
-    return token;
+    const current = this.jwtTokenSubject.value;
+
+    if (!current && isPlatformBrowser(this.platformId)) {
+      const local = localStorage.getItem('token');
+      if (local) {
+        this.setJwtToken(local);
+        return local;
+      }
+    }
+
+    return current;
   }
 
   public isTokenReceived(): boolean {
@@ -127,5 +155,79 @@ export class JwtTokenService {
   public checkForToken(): void {
     console.log('Manually checking for token');
     this.checkExistingToken();
+  }
+
+  // SIMPLE TOKEN WAIT METHODS
+
+  /**
+   * Wait for any token to arrive (no validation)
+   * @param timeoutMs - Optional timeout in milliseconds (default: 10000ms)
+   * @returns Promise that resolves when any token is received
+   */
+
+  private tokenWaitPromise: Promise<string | null> | null = null;
+
+  public async waitForToken(
+    timeoutMs: number = this.TOKEN_WAIT_TIMEOUT
+  ): Promise<string | null> {
+    if (this.tokenWaitPromise) return this.tokenWaitPromise;
+
+    this.tokenWaitPromise = new Promise(async (resolve) => {
+      const existingToken = this.getToken();
+      if (existingToken) {
+        this.tokenWaitPromise = null;
+        return resolve(existingToken);
+      }
+
+      this.isWaitingForToken = true;
+
+      try {
+        const token = await firstValueFrom(
+          this.jwtToken$.pipe(
+            filter((token) => token !== null),
+            timeout(timeoutMs),
+            catchError((error) => {
+              console.error('Token wait timeout:', error);
+              return of(null);
+            })
+          )
+        );
+
+        this.isWaitingForToken = false;
+        this.tokenWaitPromise = null;
+        if (!token) {
+          console.warn('Token still missing after wait. Redirecting...');
+          this.redirectToLogin();
+        }
+
+        resolve(token);
+      } catch (error) {
+        console.error('Token wait error:', error);
+        this.isWaitingForToken = false;
+        this.tokenWaitPromise = null;
+        this.redirectToLogin();
+        resolve(null);
+      }
+    });
+
+    return this.tokenWaitPromise;
+  }
+
+  /**
+   * Wait for token before proceeding with any action
+   * @param timeoutMs - Optional timeout in milliseconds
+   * @returns Promise that resolves when token is available (or timeout)
+   */
+  public async waitForTokenReady(timeoutMs?: number): Promise<void> {
+    console.log('Waiting for token to be ready...');
+    await this.waitForToken(timeoutMs);
+    console.log('Token wait completed');
+  }
+
+  /**
+   * Check if currently waiting for token
+   */
+  public isWaitingForTokenStatus(): boolean {
+    return this.isWaitingForToken;
   }
 }
