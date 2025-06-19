@@ -12,6 +12,8 @@ import { NgApexchartsModule } from 'ng-apexcharts';
 import { WipDetailModalComponent } from './wip-report/wip-detail-modal/wip-detail-modal.component';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatTableModule } from '@angular/material/table';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOptionModule } from '@angular/material/core';
 @NgModule({
   declarations: [ReportComponent, WipReportComponent, WipDetailModalComponent],
   imports: [
@@ -25,6 +27,8 @@ import { MatTableModule } from '@angular/material/table';
     NgApexchartsModule,
     MatDialogModule,
     MatTableModule,
+    MatFormFieldModule,
+    MatOptionModule,
   ],
   exports: [ReportComponent],
 })

@@ -26,3 +26,7 @@ body {
   align-items: center;
   z-index: 9999;
 }
+
+table.mat-table th.mat-header-cell {
+  white-space: nowrap !important;
+}

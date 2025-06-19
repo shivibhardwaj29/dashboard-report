@@ -21,6 +21,7 @@ import { MatCardModule } from '@angular/material/card';
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { JwtTokenService } from './core/services/jwt-token.service';
+import { MatSelectModule } from '@angular/material/select';
 
 // This will block app startup until token is ready (or timeout)
 export function waitForJwtFactory(jwtService: JwtTokenService) {
@@ -38,6 +39,7 @@ export function waitForJwtFactory(jwtService: JwtTokenService) {
     PagesModule,
     MatCardModule,
     NgApexchartsModule,
+    MatSelectModule
   ],
   providers: [
     provideClientHydration(),

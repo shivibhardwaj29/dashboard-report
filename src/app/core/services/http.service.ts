@@ -52,9 +52,11 @@ export class HttpService {
           }
         }
 
-        // 🔁 If token is still missing, wait for it
+        // If token is still missing, wait for it
         if (includeToken && !jwt) {
+          // const DEMO_TOKEN = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTLkFkbWluIiwiaWF0IjoxNzUwMjU0MTE0LCJleHAiOjE3NTAyNTUwMTR9.9oOg8Kgz15CwcEOstU9qmzQGrPlEtSW44f-d9UoLPOg';
           console.warn('[HttpService] Token not ready yet. Waiting...');
+          // return this.makeApiCall<T>(endpoint, params, DEMO_TOKEN);
           return from(this.jwtTokenService.waitForToken()).pipe(
             switchMap((token) => {
               if (!token) {

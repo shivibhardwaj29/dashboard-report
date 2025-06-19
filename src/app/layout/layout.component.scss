@@ -31,3 +31,15 @@ app-sidebar {
     width: 60px;
   }
 }
+.app-footer {
+  text-align: right !important;
+  padding: 12px;
+  font-size: 14px;
+  background-color: #f8f8f8;
+  color: #555;
+  border-top: 1px solid #ddd;
+  position: sticky;
+  bottom: 0;
+  width: 100%;
+  z-index: 1000;
+}

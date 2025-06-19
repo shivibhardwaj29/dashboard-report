@@ -34,6 +34,7 @@ export class ReportComponent {
       journal: [[]],
     });
     this.loadOptions();
+
     // this.jwtService.jwtToken$
     //   .pipe(
     //     filter((token) => !!token),
@@ -92,6 +93,14 @@ export class ReportComponent {
               !seenGroupIds.has(opt.value) &&
               seenGroupIds.add(opt.value)
           );
+
+        this.filterForm.patchValue({
+          productionStaffGroup: [
+            'ALL',
+            ...this.productionGroups.map((g) => g.value),
+          ],
+          journal: ['ALL', ...this.journals.map((j) => j.value)],
+        });
       });
   }
   onSubmit() {
@@ -130,5 +139,81 @@ export class ReportComponent {
   onReset() {
     this.filterForm.reset();
     this.showWIPReport = false;
+  }
+
+  isAllSelected(controlName: string, options: any[]) {
+    const selected = this.filterForm.get(controlName)?.value || [];
+    return selected.length === options.length;
+  }
+
+  toggleItem(controlName: string, value: any, options: any[]) {
+    const control = this.filterForm.get(controlName);
+    const current: any[] = control?.value || [];
+    const exists = current.includes(value);
+
+    const updated = exists
+      ? current.filter((v) => v !== value)
+      : [...current, value];
+
+    control?.setValue(updated);
+  }
+
+  onSelectionChange(field: 'journal' | 'productionStaffGroup', event: any) {
+    const control = this.filterForm.get(field);
+    const selectedValues: any[] = control?.value || [];
+
+    const allValue = 'ALL';
+    const options =
+      field === 'journal'
+        ? this.journals.map((o) => o.value)
+        : this.productionGroups.map((o) => o.value);
+
+    const allOptions = [allValue, ...options];
+
+    const changedValue = event?.option?.value;
+
+    console.log(changedValue, "channnn");
+    
+
+    if (changedValue === allValue) {
+      if (event.option.selected) {
+        control?.setValue(allOptions, { emitEvent: false });
+      } else {
+        control?.setValue([], { emitEvent: false });
+      }
+    } else {
+      const valuesWithoutAll = selectedValues.filter((v) => v !== allValue);
+      const allOtherSelected = options.every((opt) =>
+        valuesWithoutAll.includes(opt)
+      );
+
+      if (allOtherSelected) {
+        control?.setValue(allOptions, { emitEvent: false });
+      } else if (selectedValues.includes(allValue)) {
+        const updated = selectedValues.filter((v) => v !== allValue);
+        control?.setValue(updated, { emitEvent: false });
+      }
+    }
+  }
+
+  getSelectedLabels(fieldName: string): string {
+    const selectedValues = this.filterForm.get(fieldName)?.value || [];
+
+    // If "All" is selected, only display "All"
+    if (selectedValues.includes('ALL')) {
+      return 'All';
+    }
+
+    const options =
+      fieldName === 'journal'
+        ? this.journals
+        : fieldName === 'productionStaffGroup'
+        ? this.productionGroups
+        : [];
+
+    return options
+      .filter((o) => selectedValues.includes(o.value))
+      .map((o) => o.label)
+      .join(', ');
   }
 }

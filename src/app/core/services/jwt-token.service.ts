@@ -107,6 +107,7 @@ export class JwtTokenService {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const token = localStorage.getItem('token');
+    // token = "eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTLkFkbWluIiwiaWF0IjoxNzUwMjU0MTE0LCJleHAiOjE3NTAyNTUwMTR9.9oOg8Kgz15CwcEOstU9qmzQGrPlEtSW44f-d9UoLPOg"
     if (token && !this.tokenReceived) {
       console.log('Found token in localStorage, using it');
       this.setJwtToken(token);
@@ -195,6 +196,8 @@ export class JwtTokenService {
 
         this.isWaitingForToken = false;
         this.tokenWaitPromise = null;
+        // token =
+        //   'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTLkFkbWluIiwiaWF0IjoxNzUwMjU0MTE0LCJleHAiOjE3NTAyNTUwMTR9.9oOg8Kgz15CwcEOstU9qmzQGrPlEtSW44f-d9UoLPOg';
         if (!token) {
           console.warn('Token still missing after wait. Redirecting...');
           this.redirectToLogin();

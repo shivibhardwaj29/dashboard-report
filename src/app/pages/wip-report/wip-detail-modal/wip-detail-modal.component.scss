@@ -7,7 +7,6 @@
 }
 
 .table-container {
-  max-height: 400px;
   overflow: auto;
 }
 
@@ -15,4 +14,32 @@
   padding: 16px;
   text-align: center;
   color: gray;
+}
+
+.table-scroll-wrapper {
+  max-height: 400px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow-x: auto;
+  overflow-y: auto;
+  width: 100%;
+}
+
+.full-width-table {
+  min-width: 1200px;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+::ng-deep table.mat-table {
+  min-width: 1000px !important;
+}
+
+::ng-deep table.mat-table th.mat-header-cell {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: #f1f1f1;
+  white-space: nowrap !important;
+  border-bottom: 1px solid #ccc;
 }

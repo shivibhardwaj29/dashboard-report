@@ -4,10 +4,11 @@ import { SidebarService } from '../core/services/sidebar.service';
 @Component({
   selector: 'app-layout',
   templateUrl: './layout.component.html',
-  styleUrls: ['./layout.component.scss']
+  styleUrls: ['./layout.component.scss'],
 })
 export class LayoutComponent implements OnInit {
   isCollapsed = false;
+  date = new Date();
 
   constructor(private sidebarService: SidebarService) {}
 

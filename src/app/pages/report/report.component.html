@@ -12,7 +12,7 @@
     <div *ngIf="isLoading | async" class="spinner-overlay">
       <mat-spinner diameter="40"></mat-spinner>
     </div>
-    <mat-card-content *ngIf="!(isLoading | async)">
+    <mat-card-content>
       <form [formGroup]="filterForm" (ngSubmit)="onSubmit()">
         <div class="row g-2">
           <div class="col-md-4">
@@ -41,10 +41,28 @@
           <div class="col-md-4">
             <mat-form-field appearance="outline" class="dense-field full-width">
               <mat-label>Production Staff Group</mat-label>
-              <mat-select formControlName="productionStaffGroup" multiple>
+              <mat-select
+                formControlName="productionStaffGroup"
+                multiple
+                (selectionChange)="
+                  onSelectionChange('productionStaffGroup', $event)
+                "
+              >
+                <mat-select-trigger>
+                  {{ getSelectedLabels("productionStaffGroup") }}
+                </mat-select-trigger>
+                <mat-option [value]="'ALL'">All</mat-option>
+
                 <mat-option
                   *ngFor="let group of productionGroups"
                   [value]="group.value"
+                  (click)="
+                    toggleItem(
+                      'productionStaffGroup',
+                      group.value,
+                      productionGroups
+                    )
+                  "
                 >
                   {{ group?.label }}
                 </mat-option>
@@ -55,10 +73,20 @@
           <div class="col-md-4">
             <mat-form-field appearance="outline" class="dense-field full-width">
               <mat-label>Journal</mat-label>
-              <mat-select formControlName="journal" multiple>
+              <mat-select
+                formControlName="journal"
+                multiple
+                (selectionChange)="onSelectionChange('journal', $event)"
+              >
+                <mat-select-trigger>
+                  {{ getSelectedLabels("journal") }}
+                </mat-select-trigger>
+                <mat-option [value]="'ALL'">All</mat-option>
+
                 <mat-option
                   *ngFor="let journal of journals"
-                  [value]="journal?.value"
+                  [value]="journal.value"
+                  (click)="toggleItem('journal', journal.value, journals)"
                 >
                   {{ journal?.label }}
                 </mat-option>
@@ -69,11 +97,11 @@
       </form>
     </mat-card-content>
     <mat-card-actions class="card-footer d-flex justify-content-end">
-      <button class="btn btn-sm btn-primary me-2" (click)="onSubmit()">
-        Apply
-      </button>
-      <button class="btn btn-sm btn-outline-danger" (click)="onReset()">
+      <button class="btn btn-md btn-outline-danger" (click)="onReset()">
         Reset
+      </button>
+      <button class="btn btn-md btn-primary me-2" (click)="onSubmit()">
+        Search
       </button>
     </mat-card-actions>
   </mat-card>
